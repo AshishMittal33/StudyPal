@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langchain_community.document_loaders import UnstructuredAPIFileLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -23,7 +23,7 @@ text_splitter = CharacterTextSplitter(chunk_size=2000, chunk_overlap=500)
 def vectorize_book_and_store_to_db(class_subject_name,vector_db_name):
     book_dir = f"{data_dir}/{class_subject_name}"
     vector_db_path = f"{vector_db_dir}/{vector_db_name}"
-    loader = DirectoryLoader(path=book_dir, glob="./*.pdf", loader_cls=UnstructuredAPIFileLoader)
+    loader = DirectoryLoader(path=book_dir, glob="./*.pdf", loader_cls=PyPDFLoader)
     documents = loader.load()
     text_chunks = text_splitter.split_documents(documents)
     Chroma.from_documents(documents=text_chunks, embedding=embedding, persist_directory=vector_db_path)
@@ -36,7 +36,7 @@ def vectorize_chapters(class_subject_name):
         if not chapter.endswith(".pdf"):
             chapter_name = chapter[:-4]
             chapter_pdf_path = f"{book_dir}/{chapter}"
-            loader = UnstructuredAPIFileLoader(chapter_pdf_path)
+            loader = PyPDFLoader(chapter_pdf_path)
             documents = loader.load()
             texts = text_splitter.split_documents(documents)
             Chroma.from_documents(documents=texts, embedding=embedding, persist_directory=f"{chapters_vector_db_dir}/{chapter_name}")
